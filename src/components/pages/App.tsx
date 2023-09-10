@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import { BrowserRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
-import { CourseItem } from '../def';
 import { useLocalStorage } from '../storage';
 import { Login } from './Login';
 import { Plan } from './Plan';
@@ -26,33 +25,29 @@ const AnimatedRoutes = () => {
     const [nextPath, setNextPath] = useState(location.pathname);
 
     const [animation, setAnimation] = useState("page");
-    const [items, setItems] = useState<CourseItem[]>([]);
-
     const [storage, setStorage] = useLocalStorage("_storage", {
         session: null,
         username: null,
         password: null
     });
 
-    const onNext = useCallback(() => {
 
-    }, [])
-
-    const onPrev = useCallback(() => {
-
-    }, [])
-
-    const onChangePath = useCallback((path: string) => {
-        setAnimation("page-out");
+    const onChangePath = useCallback((path: string, rev: boolean) => {
+        if(rev)
+        {
+            setAnimation("page-out-rev");
+        }else{
+            setAnimation("page-out");
+        }
         setNextPath(path);
     }, [setAnimation, setNextPath])
 
     return <div
         className={animation}
         onAnimationEnd={() => {
-            if (animation === "page-out") 
+            if (animation === "page-out" || animation === "page-out-rev") 
             {
-                setAnimation("page-in");
+                setAnimation(animation == "page-out" ? "page-in" : "page-in-rev");
                 setPath(nextPath);
                 navigate(nextPath)
             }
@@ -61,7 +56,7 @@ const AnimatedRoutes = () => {
         <Routes location={path}>
             <Route path="/" element={<Login storage={storage} setStorage={setStorage} setPath={onChangePath} />} />
             <Route path="/selection" element={<Selection setPath={onChangePath} />}  />
-            <Route path="/planning" element={<Plan onNext={onNext} onPrev={onPrev} items={items} setPath={onChangePath} />} />
+            <Route path="/planning/:id/:date" element={<Plan storage={storage} setStorage={setStorage} setPath={onChangePath} />} />
         </Routes>
     </div>
 }

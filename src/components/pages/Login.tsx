@@ -10,7 +10,7 @@ type LoginProps = {
     storage: object;
     
     setStorage: (value: object) => void;
-    setPath: (path: string) => void;
+    setPath: (path: string, rev: boolean) => void;
 }
 type PasswordInputProsp = {
     value?: string;
@@ -50,7 +50,6 @@ export const Login = ({ storage, setStorage, setPath }: LoginProps) => {
                     setPassword("");
                     setError("Mauvais identifiant / mot de passe.")
                     setLoading(false);
-                    setPath('/selection')
                     return;
                 }
 
@@ -65,7 +64,7 @@ export const Login = ({ storage, setStorage, setPath }: LoginProps) => {
                 }
                 setError("")
                 setLoading(false);
-                setPath('/selection');
+                setPath('/selection', false);
             }).catch(() => {
                 setLoading(false);
             })

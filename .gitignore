@@ -12,7 +12,6 @@ dist
 dist-ssr
 *.local
 
-/android
 
 .vscode/*
 !.vscode/extensions.json
