@@ -1,0 +1,39 @@
+.page, .page-in, .page-out{
+    height: 100%;
+        width: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
+}
+
+.page-in {
+    animation: 300ms in forwards;
+}
+
+.page-out {
+    animation: 300ms out forwards;
+}
+
+
+@keyframes in {
+    from {
+
+        transform: translate(-200%, 0);
+    }
+
+    to {
+        transform: translate(0px, 0px);
+    }
+}
+
+@keyframes out {
+    from {
+        opacity: 1;
+        transform: translate(0px, 0px);
+    }
+
+    to {
+        transform: translate(200%, 0);
+        opacity: 0;
+    }
+}

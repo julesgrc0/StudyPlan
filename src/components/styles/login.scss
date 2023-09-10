@@ -1,0 +1,48 @@
+.login {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+
+    .logo {
+        position: relative;
+        width: 60%;
+        left: 50%;
+        top: 10%;
+        transform: translate(-50%, -10%);
+    }
+
+    .main {
+        width: 100%;
+        position: relative;
+        top: 15%;
+        left: 50%;
+        transform: translate(-50%, 0%);
+
+        width: 80%;
+        gap: 20px;
+
+        div {
+            width: 100%;
+
+            .label {
+                margin-bottom: 5px;
+                color: #797979;
+            }
+
+            .pass-input {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }
+        }
+    }
+
+    .btn {
+        position: relative;
+        top: calc(15% + 20px);
+        left: 50%;
+        transform: translateX(-50%);
+    }
+}

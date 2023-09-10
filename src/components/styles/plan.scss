@@ -1,0 +1,35 @@
+.plan {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+
+    .head {
+        height: 80px;
+        background: black;
+        margin-bottom: 20px;
+        position: relative;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .scroll-section {
+        position: relative;
+        height: calc(100% - 100px);
+        overflow-y: scroll;
+
+        div {
+            min-height: 100px;
+            padding: 5px 10px;
+        }
+
+        .no-course {
+            background: linear-gradient(45deg, #ccc 1%, #fff 1%, #fff 49%, #ccc 49%, #ccc 51%, #fff 51%, #fff 99%, #ccc 99%);
+            background-size: 6px 6px;
+            background-position: 50px 50px;
+        }
+    }
+}
