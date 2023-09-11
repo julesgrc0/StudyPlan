@@ -1,63 +1,75 @@
-.page, .page-in, .page-out, .page-in-rev, .page-out-rev{
-    height: 100%;
-        width: 100%;
-        position: absolute;
-        left: 0;
-        top: 0;
+.page,
+.page-in,
+.page-out,
+.page-in-rev,
+.page-out-rev,
+.page-in-sp,
+.page-out-sp,
+.page-in-sp-rev,
+.page-out-sp-rev {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
 }
 
 .page-in {
-    animation: 300ms in forwards;
+  animation: 300ms in forwards;
 }
 
 .page-out {
-    animation: 300ms out forwards;
+  animation: 300ms out forwards;
 }
 
 .page-out-rev {
-    animation: 300ms revout forwards;
+  animation: 300ms revout forwards;
 }
 
 .page-in-rev {
-    animation: 300ms revin forwards;
+  animation: 300ms revin forwards;
+}
+
+.page-sp {
+  transform: translate(0px, 0px);
 }
 
 @keyframes in {
-    from {
-        transform: translate(100%, 0);
-    }
+  from {
+    transform: translate(100%, 0);
+  }
 
-    to {
-        transform: translate(0px, 0px);
-    }
+  to {
+    transform: translate(0px, 0px);
+  }
 }
 
 @keyframes out {
-    from {
-        transform: translate(0px, 0px);
-    }
+  from {
+    transform: translate(0px, 0px);
+  }
 
-    to {
-        transform: translate(-100%, 0);
-    }
+  to {
+    transform: translate(-100%, 0);
+  }
 }
 
 @keyframes revin {
-    from {
-        transform: translate(-100%, 0);
-    }
+  from {
+    transform: translate(-100%, 0);
+  }
 
-    to {
-        transform: translate(0px, 0px);
-    }
+  to {
+    transform: translate(0px, 0px);
+  }
 }
 
 @keyframes revout {
-    from {
-        transform: translate(0px, 0px);
-    }
+  from {
+    transform: translate(0px, 0px);
+  }
 
-    to {
-        transform: translate(100%, 0);
-    }
+  to {
+    transform: translate(100%, 0);
+  }
 }

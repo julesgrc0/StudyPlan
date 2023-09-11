@@ -1,4 +1,5 @@
-import * as ical from 'ical'
+import { CalendarComponent, FullCalendar } from '../lib/index';
+import ical from '../lib/ical';
 
 import { ApiPlugin, CalendarDataObject, SessionDataObject } from '../plugin/index';
 import { CourseItem } from './def';
@@ -15,26 +16,29 @@ export const getSession = async (url: string, username: string, password: string
     return session?.session ?? null;
 }
 
-export const getCalendarRange = async (url: string, projectId: number, resourceId: number, startDate: Date, endDate: Date) => {
+export const formateDate = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
+export const getCalendarData = async (url: string, projectId: number, resourceId: number, date: Date) => {
     let objData: CalendarDataObject | null = await ApiPlugin.plugin_getCalendarData({
-        url, projectId, resourceId, startDate: startDate.toLocaleDateString('en-US'), endDate: endDate.toLocaleDateString('en-US')
+        url, projectId, resourceId, date: formateDate(date)
     })
+
 
     let courses: CourseItem[] = [];
     if (objData == null) return courses;
 
     let data: string = objData.data;
     data = data.replace('\n', '<line>');
-    
+
     try {
 
-        const calendar: ical.FullCalendar = ical.parseICS(data);
+        const calendar: FullCalendar = ical.parseICS(data);
 
         let next_start: Date = new Date();
         next_start.setHours(0, 0, 0, 0);
 
         Object.keys(calendar).map((uuid: string) => {
-            const item: ical.CalendarComponent = calendar[uuid];
+            const item: CalendarComponent = calendar[uuid];
 
 
             if (!item.start || !item.end) {
@@ -69,7 +73,7 @@ export const getCalendarRange = async (url: string, projectId: number, resourceI
 
             next_start = item.start;
 
-            
+
             courses.push({
                 is_course: true,
                 summary: item.summary ?? "",
@@ -79,19 +83,15 @@ export const getCalendarRange = async (url: string, projectId: number, resourceI
             })
         })
 
-        if(next_start.getHours() !== 0)
-        {
-            let diff = 24 - next_start.getHours();
-            for (let i = 0; i < diff; i++) {
-                courses.push({
-                    is_course: false,
-                    summary: "",
-                    location: "",
-                    description: "",
-                    time_info: ""
-                })
-            }
-
+        let diff = 24 - next_start.getHours();
+        for (let i = 0; i < diff; i++) {
+            courses.push({
+                is_course: false,
+                summary: "",
+                location: "",
+                description: "",
+                time_info: ""
+            })
         }
     } catch { }
     return courses;

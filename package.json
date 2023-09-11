@@ -20,7 +20,6 @@
     "date-fns": "^2.30.0",
     "dayzed": "^3.2.3",
     "framer-motion": "^10.16.4",
-    "ical": "^0.8.0",
     "react": "^18.2.0",
     "react-dom": "^18.0.0",
     "react-router-dom": "^6.3.0",
@@ -28,7 +27,6 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^5.3.0",
-    "@types/ical": "^0.8.0",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@types/react-router-dom": "^5.3.3",

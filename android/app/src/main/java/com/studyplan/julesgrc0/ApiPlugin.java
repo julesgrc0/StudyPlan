@@ -20,6 +20,8 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 @CapacitorPlugin(name="ApiPlugin")
 public class ApiPlugin  extends Plugin {
     public ApiPlugin()
@@ -27,42 +29,12 @@ public class ApiPlugin  extends Plugin {
 
     }
 
-    private String getFormattedDate(Date date) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        return dateFormat.format(date);
-    }
-
-    private Date parseFormattedDate(String str)
-    {
-        DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
-        try {
-            return df.parse(str);
-        } catch (ParseException e) {
-            return new Date();
-        }
-    }
-
-    private String readConnection(HttpURLConnection connection) {
-        try {
-
-
-            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            StringBuilder htmlContent = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                htmlContent.append(line);
-            }
-            reader.close();
-            return htmlContent.toString();
-        }catch (Exception ignored) {}
-        return null;
-    }
-    private  String getExecutionString(String url) {
+    /*private  String getExecutionString(String url) {
         try {
             URL requestUrl = new URL(url);
             HttpURLConnection connection = (HttpURLConnection) requestUrl.openConnection();
-            connection.setRequestMethod("POST");
-            connection.setInstanceFollowRedirects(false);
+            connection.setRequestMethod("GET");
+            connection.setInstanceFollowRedirects(true);
 
             if (connection.getResponseCode() == HttpURLConnection.HTTP_OK)
             {
@@ -130,24 +102,38 @@ public class ApiPlugin  extends Plugin {
             connection.disconnect();
         } catch (IOException ignored) {}
         return null;
+    }*/
+    private String getSession(String url, String username, String password)
+    {
+        try{
+            Thread.sleep(500);
+        }catch (Exception ignored) {}
+        return "session";
     }
-    private String getCalendarData(String base_url, int projectId, int resourceId, Date startDate, Date endDate) {
-        try {
 
+    private String getCalendarData(String base_url, int projectId, int resourceId, String date) {
+        try {
             String url = base_url +
                     "?resources=" + resourceId +
                     "&projectId=" + projectId +
                     "&calType=ical" +
-                    "&firstDate=" + this.getFormattedDate(startDate) +
-                    "&lastDate=" + this.getFormattedDate(endDate);
+                    "&firstDate=" +  date +
+                    "&lastDate=" + date;
 
             URL requestUrl = new URL(url);
             HttpURLConnection connection = (HttpURLConnection) requestUrl.openConnection();
             connection.setRequestMethod("GET");
 
-            String htmlContent = this.readConnection(connection);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            StringBuilder htmlContent = new StringBuilder();
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                htmlContent.append(line).append("\n");
+            }
+
             connection.disconnect();
-            return htmlContent;
+            return htmlContent.toString();
         } catch (IOException ignored) {}
         return null;
     }
@@ -172,9 +158,7 @@ public class ApiPlugin  extends Plugin {
                 call.getString("url"),
                 call.getInt("projectId"),
                 call.getInt("resourceId"),
-                this.parseFormattedDate(call.getString("startDate")),
-                this.parseFormattedDate(call.getString("endDate"))
-                );
+                call.getString("date"));
 
         JSObject ret = new JSObject();
         ret.put("data", data);

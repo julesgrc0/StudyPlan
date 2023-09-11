@@ -5,12 +5,13 @@ import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons'
 import { LOGIN_URL, getSession } from '../api'
 import Logo from '../../assets/logo.svg'
 import '../styles/login.scss'
+import { PageAnimationType } from '../def';
 
 type LoginProps = {
     storage: object;
     
     setStorage: (value: object) => void;
-    setPath: (path: string, rev: boolean) => void;
+    setPath: (path: string, type: PageAnimationType) => void;
 }
 type PasswordInputProsp = {
     value?: string;
@@ -30,7 +31,7 @@ const PasswordInput = ({ value, onChange }: PasswordInputProsp) => {
 
 
 
-export const Login = ({ storage, setStorage, setPath }: LoginProps) => {
+export default  ({ storage, setStorage, setPath }: LoginProps) => {
     const [loading, setLoading] = useState<boolean>(false);
     const [save, setSave] = useState<boolean>(true);
 
@@ -64,7 +65,7 @@ export const Login = ({ storage, setStorage, setPath }: LoginProps) => {
                 }
                 setError("")
                 setLoading(false);
-                setPath('/selection', false);
+                setPath('/selection', PageAnimationType.DEFAULT);
             }).catch(() => {
                 setLoading(false);
             })

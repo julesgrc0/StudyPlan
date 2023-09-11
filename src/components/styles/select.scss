@@ -4,18 +4,29 @@
     left: 0;
     height: 100%;
     width: 100%;
-    .main {
-        position: absolute;
-        top: 30%;
+
+    .logo {
+        position: relative;
+        width: 60%;
         left: 50%;
-        transform: translateX(-50%);
-        width: 90%;
-        padding: 20px;
+        top: 10%;
+        transform: translate(-50%, -10%);
+    }
+
+    .main {
+        width: 100%;
+        position: relative;
+        top: 15%;
+        left: 50%;
+        transform: translate(-50%, 0%);
+
+        width: 80%;
+        gap: 20px;
 
 
-        .select-btn{
+        .select-btn {
             margin-top: 20px;
             width: 100%;
         }
-    }   
+    }
 }

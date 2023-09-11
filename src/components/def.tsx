@@ -1,4 +1,9 @@
 
+export enum PageAnimationType {
+    DEFAULT = "",
+    REVERSE = "-rev",
+    SPEED = "-sp",
+}
 
 export type CourseItem = {
     is_course: boolean;

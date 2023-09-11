@@ -1,12 +1,15 @@
 import { Select, Button, Kbd, Heading } from "@chakra-ui/react";
 import { useCallback, useState } from "react";
+import Logo from '../../assets/logo.svg'
+
 import "../styles/select.scss";
+import { PageAnimationType } from "../def";
 
 type SelectionProps = {
     storage: object;
 
     setStorage: (value: object) => void;
-    setPath: (path: string, rev: boolean) => void;
+    setPath: (path: string, type: PageAnimationType) => void;
 };
 
 type TreeItem = {
@@ -23,19 +26,19 @@ const tree: TreeItem = {
     ISTIC: {
         "L1-L2 Portail ISTN": {
             "License 1": {
-                "Parcours Défi": 2333,
-                "Parcours LAS": 2336,
+                "Parcours Défi": 2898,
+                "Parcours LAS": 1,
 
-                "Classique G1": 2873,
-                "Classique G10": 2876,
-                "Classique G2": 2879,
-                "Classique G3": 2882,
-                "Classique G4": 2885,
-                "Classique G5": 2888,
+                "Classique G1": 1,
+                "Classique G10": 1,
+                "Classique G2": 1,
+                "Classique G3": 2898,
+                "Classique G4": 1,
+                "Classique G5": 1,
 
-                "Aménagé G6": 2864,
-                "Aménagé G7": 2867,
-                "Aménagé G8": 2870,
+                "Aménagé G6": 1,
+                "Aménagé G7": 1,
+                "Aménagé G8": 1,
             },
             "License 1-2": {},
             "License 2": {},
@@ -106,7 +109,7 @@ const TreeSelection = ({
     );
 };
 
-export const Selection = ({ storage, setStorage, setPath }: SelectionProps) => {
+export default ({ storage, setStorage, setPath }: SelectionProps) => {
     const [resourceId, setResourceId] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(false);
     const onValidate = useCallback(() => {
@@ -114,14 +117,14 @@ export const Selection = ({ storage, setStorage, setPath }: SelectionProps) => {
         setTimeout(() => {
             setLoading(false);
             setStorage({ ...storage, resourceId });
-            setPath(`/planning/${resourceId}/${new Date().getTime()}`, false)
+            setPath(`/planning/${resourceId}/${new Date().getTime()}`, PageAnimationType.DEFAULT)
         }, 500);
     }, [resourceId, setPath])
     return (
         <div className="selection">
-           
+            <img src={Logo} className='logo' />
             <div className="main">
-                <Heading mt="-100px" mb='80px' size='3xl' p='0px' textAlign={"left"} >
+                <Heading  mb='30px' size='lg' textAlign={"left"} >
                     Selectionner votre classe
                 </Heading>
                 <TreeSelection

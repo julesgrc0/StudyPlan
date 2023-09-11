@@ -1,13 +1,14 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, lazy } from 'react';
 import { BrowserRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
 import { useLocalStorage } from '../storage';
-import { Login } from './Login';
-import { Plan } from './Plan';
-import { Selection } from './Selection';
+import { DEFAULT_STORAGE, PageAnimationType } from '../def';
+
+const Login = lazy(()=> import('./Login'))
+const Plan = lazy(() => import('./Plan'))
+const Selection = lazy(() => import('./Selection'))
 
 import '../styles/app.scss';
-import { DEFAULT_STORAGE } from '../def';
 
 export const App = () => {
     return <BrowserRouter>
@@ -30,26 +31,31 @@ const AnimatedRoutes = () => {
     useEffect(() => {
         if(storage.session != null)
         {
-            navigate(`/planning/${storage.resourceId}/${new Date().getTime()}`)
+            let next = `/planning/${storage.resourceId}/${new Date().getTime()}`;
+            navigate(next)
+            setPath(next)
         }
     }, [])
-
-    const onChangePath = useCallback((path: string, rev: boolean) => {
-        if(rev)
+    
+    const onChangePath = useCallback((path: string, type: PageAnimationType) => {
+        if (type == PageAnimationType.SPEED)
         {
-            setAnimation("page-out-rev");
+            setPath(path);
+            setNextPath(path);
+            navigate(path);
         }else{
-            setAnimation("page-out");
+            setAnimation("page-out" + type);
+            setNextPath(path);
         }
-        setNextPath(path);
     }, [setAnimation, setNextPath])
+
 
     return <div
         className={animation}
         onAnimationEnd={() => {
-            if (animation === "page-out" || animation === "page-out-rev") 
+            if (animation.includes("out")) 
             {
-                setAnimation(animation == "page-out" ? "page-in" : "page-in-rev");
+                setAnimation(animation.replace('out','in'));
                 setPath(nextPath);
                 navigate(nextPath)
             }
