@@ -49,8 +49,6 @@ export const getCalendarData = async (url: string, projectId: number, resourceId
         let next_start: Date = new Date();
         next_start.setHours(0, 0, 0, 0);
 
-        fillFreeTime(1, next_start);
-
         Object.keys(calendar).map((uuid: string) => {
             const item: CalendarComponent = calendar[uuid];
 

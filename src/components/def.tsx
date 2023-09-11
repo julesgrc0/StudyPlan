@@ -17,9 +17,10 @@ export type StorageData = {
     session: string | null;
     username: string | null;
     password: string | null;
+    resourceId: number;
 }
 
-export const DEFAULT_STORAGE = {
+export const DEFAULT_STORAGE: StorageData = {
     session: null,
     username: null,
     password: null,

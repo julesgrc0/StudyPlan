@@ -1,9 +1,9 @@
 import { Select, Button, Kbd, Heading } from "@chakra-ui/react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 
 import "../styles/select.scss";
-import { DEFAULT_STORAGE, PageAnimationType } from "../def";
+import { DEFAULT_STORAGE, PageAnimationType, StorageData } from "../def";
 import logo from '../../assets/logo.svg'
 import tree from '../../assets/tree.json'
 
@@ -65,7 +65,7 @@ const TreeSelection = ({
                         Selectionner
                     </Button>
                 )}
-                {onGoBack !== undefined && <Button
+                {(resourceId === 0 && onGoBack !== undefined) && <Button
                     className="select-btn"
                     onClick={onGoBack}>
                     Retour
@@ -103,6 +103,10 @@ export default ({ storage, setStorage, setPath }: SelectionProps) => {
     const [resourceId, setResourceId] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(false);
 
+    useEffect(()=>{
+        setResourceId((storage as StorageData).resourceId)
+    }, [storage])
+
     const onGoBack = useCallback(()=>{
         setResourceId(0);
         setLoading(false);
@@ -132,7 +136,6 @@ export default ({ storage, setStorage, setPath }: SelectionProps) => {
                     setResourceId={setResourceId}
                     onGoBack={onGoBack}
                 />
-               
                 {resourceId != 0 && (
                     <Button
                         className="select-btn"
