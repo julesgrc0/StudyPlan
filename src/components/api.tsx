@@ -23,12 +23,24 @@ export const getCalendarData = async (url: string, projectId: number, resourceId
         url, projectId, resourceId, date: formateDate(date)
     })
 
-
     let courses: CourseItem[] = [];
     if (objData == null) return courses;
 
-    let data: string = objData.data;
-    data = data.replace('\n', '<line>');
+    let data: string = objData.data.replace('\n', '<line>');
+
+    const fillFreeTime = (date0: Date | number, date1: Date | number ) =>
+    {
+        let diff = (typeof date0 == "number" ? date0 : date0.getHours()) - (typeof date1 == "number" ? date1 : date1.getHours());
+        for (let i = 0; i < diff; i++) {
+            courses.push({
+                is_course: false,
+                summary: "",
+                location: "",
+                description: "",
+                time_info: ""
+            })
+        }
+    }
 
     try {
 
@@ -36,6 +48,8 @@ export const getCalendarData = async (url: string, projectId: number, resourceId
 
         let next_start: Date = new Date();
         next_start.setHours(0, 0, 0, 0);
+
+        fillFreeTime(1, next_start);
 
         Object.keys(calendar).map((uuid: string) => {
             const item: CalendarComponent = calendar[uuid];
@@ -47,16 +61,7 @@ export const getCalendarData = async (url: string, projectId: number, resourceId
 
             if (next_start.getHours() !== 0 && next_start.getTime() != item.start.getTime()) {
 
-                let diff = item.start.getHours() - next_start.getHours();
-                for (let i = 0; i < diff; i++) {
-                    courses.push({
-                        is_course: false,
-                        summary: "",
-                        location: "",
-                        description: "",
-                        time_info: ""
-                    })
-                }
+                fillFreeTime(item.start, next_start)
             }
 
             let time_info = "";
@@ -83,16 +88,7 @@ export const getCalendarData = async (url: string, projectId: number, resourceId
             })
         })
 
-        let diff = 24 - next_start.getHours();
-        for (let i = 0; i < diff; i++) {
-            courses.push({
-                is_course: false,
-                summary: "",
-                location: "",
-                description: "",
-                time_info: ""
-            })
-        }
+        fillFreeTime(24, next_start);
     } catch { }
     return courses;
 }

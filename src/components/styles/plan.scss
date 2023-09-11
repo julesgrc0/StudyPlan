@@ -8,7 +8,6 @@
     .head {
         height: 80px;
         background: black;
-        margin-bottom: 20px;
         position: relative;
 
         display: flex;
@@ -18,7 +17,7 @@
 
     .scroll-section {
         position: relative;
-        height: calc(100% - 100px);
+        height: calc(100% - 80px);
         overflow-y: scroll;
 
         div {

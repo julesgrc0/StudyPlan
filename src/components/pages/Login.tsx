@@ -3,7 +3,7 @@ import { VStack, Text, Input, Checkbox, Button, IconButton } from '@chakra-ui/re
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons'
 
 import { LOGIN_URL, getSession } from '../api'
-import Logo from '../../assets/logo.svg'
+import logo from '../../assets/logo.svg'
 import '../styles/login.scss'
 import { PageAnimationType } from '../def';
 
@@ -84,7 +84,7 @@ export default  ({ storage, setStorage, setPath }: LoginProps) => {
     }, [storage, save, username, password, loading, setPath, setPassword, setLoading, setStorage, setError])
 
     return <div className='login'>
-        <img src={Logo} className='logo' />
+        <img src={logo} className='logo' />
         <VStack className='main'>
             <div>
                 <Text className='label'>Identifiant</Text>

@@ -1,0 +1,44 @@
+{
+    "ISTIC": {
+        "L1-L2 Portail ISTN": {
+            "License 1": {
+                "L1 ISTN parcours Défi": 2959,
+                "L1 ISTN parcours LAS": 2951,
+                "Parcours Aménagé": {
+                    "L1 ISTN-G6": 2924,
+                    "L1 ISTN-G7": 2937,
+                    "L1 ISTN-G8": 2926
+                },
+                "Parcours Classique": {
+                    "L1 ISTN-G1": 2885,
+                    "L1 ISTN-G10": 1185,
+                    "L1 ISTN-G2": 2888,
+                    "L1 ISTN-G3": 2898,
+                    "L1 ISTN-G4": 2906,
+                    "L1 ISTN-G5": 2909
+                },
+                "Langues LV1": {
+                    "Anglais G1": 1407,
+                    "Anglais G10": 5257,
+                    "Anglais G11": 5258,
+                    "Anglais G12": 5289,
+                    "Anglais G2": 1764,
+                    "Anglais G3": 1760,
+                    "Anglais G4": 3919,
+                    "Anglais G5": 5190,
+                    "Anglais G6": 5196,
+                    "Anglais G7": 5221,
+                    "Anglais G8": 5226,
+                    "Anglais G9": 5256
+                },
+                "Langues LV2": {
+                    "Allemand G1": 2376,
+                    "Espagnol G1": 2421
+                }
+            },
+            "License 1-2": {},
+            "License 2": {}
+        }
+    },
+    "ESIR": {}
+}
