@@ -1,6 +1,6 @@
 import * as ical from 'ical'
 
-import { ApiPlugin } from '../plugin/index';
+import { ApiPlugin, CalendarDataObject, SessionDataObject } from '../plugin/index';
 import { CourseItem } from './def';
 
 export const LOGIN_URL = 'https://sso-cas.univ-rennes1.fr/login?service=https://ent.univ-rennes1.fr/Login'
@@ -9,18 +9,21 @@ export const PROJECT_ID = 1;
 
 
 export const getSession = async (url: string, username: string, password: string) => {
-    return await ApiPlugin.plugin_getSession({
+    let session: SessionDataObject | null = await ApiPlugin.plugin_getSession({
         url, username, password
     })
+    return session?.session ?? null;
 }
 
 export const getCalendarRange = async (url: string, projectId: number, resourceId: number, startDate: Date, endDate: Date) => {
-    let data = await ApiPlugin.plugin_getCalendarData({
+    let objData: CalendarDataObject | null = await ApiPlugin.plugin_getCalendarData({
         url, projectId, resourceId, startDate: startDate.toLocaleDateString('en-US'), endDate: endDate.toLocaleDateString('en-US')
     })
 
     let courses: CourseItem[] = [];
-    if (data == null) return courses;
+    if (objData == null) return courses;
+
+    let data: string = objData.data;
     data = data.replace('\n', '<line>');
     
     try {

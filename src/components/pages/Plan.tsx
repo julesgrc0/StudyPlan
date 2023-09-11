@@ -17,7 +17,8 @@ import {
     ModalBody,
     ModalCloseButton,
     VStack,
-    Divider
+    Divider,
+    Spinner
 } from "@chakra-ui/react"
 import {
     ArrowBackIcon,
@@ -89,10 +90,7 @@ export const EditModal = ({ open, date, resourceId, setOpen, setPath, setStorage
             </ModalBody>
 
             <ModalFooter>
-                <Button variant={'ghost'} mr={3} onClick={() => setOpen(false)}>
-                    Fermer
-                </Button>
-                <Button bg='black' colorScheme='blackAlpha' onClick={() => setOpen(false)}>Enregistrer</Button>
+                <Button bg='black' colorScheme='blackAlpha' onClick={() => setOpen(false)}>Fermer</Button>
             </ModalFooter>
         </ModalContent>
     </Modal>
@@ -121,6 +119,7 @@ export const Plan = ({ storage, setPath, setStorage }: PlanProps) => {
     const { id, date } = useParams();
     const [items, setItems] = useState<CourseItem[]>([]);
     const [modalOpen, setOpenModal] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(true);
 
     const d_date = useMemo(() => date ? new Date(parseInt(date)) : null, [date]);
     const i_id = useMemo(() => id ? parseInt(id) : null, [id]);
@@ -133,11 +132,14 @@ export const Plan = ({ storage, setPath, setStorage }: PlanProps) => {
 
         getCalendarRange(CALENDAR_URL, PROJECT_ID, i_id, d_date, d_date)
             .then((calendar) => {
+                setLoading(false);
                 if (calendar == null) {
                     setPath("/", false)
                     return;
                 }
                 setItems(calendar);
+            }).catch(()=>{
+                setLoading(false);
             })
 
     }, [d_date, i_id, storage, setPath]);
@@ -157,7 +159,7 @@ export const Plan = ({ storage, setPath, setStorage }: PlanProps) => {
                 <IconButton aria-label="" icon={<ArrowForwardIcon />} size={'lg'} bg='transparent' color={'white'} _hover={{ background: 'transparent' }} onClick={() => onOperationDate(1)} />
             </HStack>
         </div>
-        <div className="scroll-section">
+        {!loading &&<div className="scroll-section">
             {items.map((item, index) =>
                 !item.is_course
                     ?
@@ -176,7 +178,13 @@ export const Plan = ({ storage, setPath, setStorage }: PlanProps) => {
                         </Stat>
                     </div>
             )}
-        </div>
+        </div>}
+        {loading &&
+            <VStack pos={'absolute'} top={'50%'} left={'50%'} transform={'translate(-50%,-50%)'}>
+                <Spinner size='xl'  thickness='4px' mb='20px'/>
+                <p>Chargement...</p>
+        </VStack>
+        }
         <EditModal open={modalOpen} resourceId={i_id ?? 0} date={d_date ?? new Date()} setOpen={setOpenModal} setPath={setPath} setStorage={setStorage} />
     </div>
 }

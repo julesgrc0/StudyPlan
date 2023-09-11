@@ -1,5 +1,5 @@
 import { WebPlugin } from "@capacitor/core";
-import type { ApiPlugin } from "./definitions";
+import type { ApiPlugin, SessionDataObject, CalendarDataObject } from "./definitions";
 
 export class ApiPluginWeb extends WebPlugin implements ApiPlugin {
     constructor() {
@@ -7,20 +7,21 @@ export class ApiPluginWeb extends WebPlugin implements ApiPlugin {
     }
 
 
-    public plugin_getSession(_data: object): Promise<string | null>
+    public plugin_getSession(_data: object): Promise<SessionDataObject | null>
     {
         return new Promise((res) => {
             setTimeout(()=>{
-                res("FAKE_SESSION")
+                res({session: "FAKE_SESSION"})
             }, 1000)
         });
     }
     
-    public plugin_getCalendarData(_data: object): Promise<string | null>
+    public plugin_getCalendarData(_data: object): Promise<CalendarDataObject | null>
     {
         return new Promise((res) => {
             setTimeout(()=>{
-                res(`BEGIN:VCALENDAR
+                res({ data:
+`BEGIN:VCALENDAR
 METHOD:PUBLISH
 PRODID:-//ADE/version 6.0
 VERSION:2.0
@@ -90,7 +91,7 @@ CREATED:19700101T000000Z
 LAST-MODIFIED:20230619T154200Z
 SEQUENCE:-1977903576
 END:VEVENT
-END:VCALENDAR`)
+END:VCALENDAR`})
             }, 1000)
         });
     }
