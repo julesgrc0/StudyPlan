@@ -45,4 +45,11 @@
         left: 50%;
         transform: translateX(-50%);
     }
+
+    .btn-skip {
+        position: relative;
+        top: calc(15% + 20px);
+        left: 50%;
+        transform: translateX(-50%);
+    }
 }

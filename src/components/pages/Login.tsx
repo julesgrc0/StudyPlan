@@ -38,7 +38,19 @@ export default  ({ storage, setStorage, setPath }: LoginProps) => {
     const [username, setUsername] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     const [error, setError] = useState<string>("");
+    const onSkip = useCallback(()=>{
+        if(loading) return;
 
+        setStorage({
+            ...storage,
+            session: "NO_SESSION",
+            username: "",
+            password: ""
+        });
+    
+        setError("")   
+        setPath('/selection', PageAnimationType.DEFAULT);
+    },[])
     const onLogin = useCallback(() => {
         if (loading) {
             return;
@@ -88,5 +100,7 @@ export default  ({ storage, setStorage, setPath }: LoginProps) => {
             </Text>
         </VStack>
         <Button className='btn' pos={'relative'} mt='25px' bg='black' colorScheme='blackAlpha' w='80%' isLoading={loading} onClick={onLogin}>Se connecter</Button>
+        <Button className='btn-skip' pos={'relative'} mt='25px' colorScheme='gray' w='80%' onClick={onSkip}>Passer</Button>
+
     </div>
 }
