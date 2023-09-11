@@ -6,6 +6,7 @@ export class ApiPluginWeb extends WebPlugin implements ApiPlugin {
         super();
     }
 
+
     public plugin_getCalendarData(_data: object): Promise<string | null>
     {
         console.log(_data);
@@ -15,6 +16,6 @@ export class ApiPluginWeb extends WebPlugin implements ApiPlugin {
     public plugin_getSession(_data: object): Promise<string | null>
     {
         console.log(_data);
-        return new Promise((res)=> res(null));
+        return new Promise((res) => res(null));
     }
 }

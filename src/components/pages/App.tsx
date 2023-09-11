@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { BrowserRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
 import { useLocalStorage } from '../storage';
@@ -9,8 +9,6 @@ import { Selection } from './Selection';
 import '../styles/app.scss';
 
 export const App = () => {
-
-
     return <BrowserRouter>
         <AnimatedRoutes />
     </BrowserRouter>
@@ -28,9 +26,17 @@ const AnimatedRoutes = () => {
     const [storage, setStorage] = useLocalStorage("_storage", {
         session: null,
         username: null,
-        password: null
+        password: null,
+        resourceId: 0
     });
 
+
+    useEffect(() => {
+        if(storage.session != null)
+        {
+            navigate(`/planning/${storage.resourceId}/${new Date().getTime()}`)
+        }
+    }, [])
 
     const onChangePath = useCallback((path: string, rev: boolean) => {
         if(rev)
@@ -55,7 +61,7 @@ const AnimatedRoutes = () => {
     >
         <Routes location={path}>
             <Route path="/" element={<Login storage={storage} setStorage={setStorage} setPath={onChangePath} />} />
-            <Route path="/selection" element={<Selection setPath={onChangePath} />}  />
+            <Route path="/selection" element={<Selection setPath={onChangePath} storage={storage} setStorage={setStorage} />}  />
             <Route path="/planning/:id/:date" element={<Plan storage={storage} setStorage={setStorage} setPath={onChangePath} />} />
         </Routes>
     </div>

@@ -59,7 +59,7 @@ export const Plan = ({ storage, setPath }: PlanProps) => {
             return;
         }
 
-        getCalendarRange(CALENDAR_URL, storage.session, PROJECT_ID, i_id, d_date, d_date)
+        getCalendarRange(CALENDAR_URL, PROJECT_ID, i_id, d_date, d_date)
             .then((calendar) => {
                 if (calendar == null) {
                     setPath("/", false)

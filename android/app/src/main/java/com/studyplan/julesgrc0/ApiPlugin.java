@@ -1,7 +1,5 @@
 package com.studyplan.julesgrc0;
 
-import android.util.Log;
-
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
@@ -14,7 +12,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -25,6 +26,37 @@ public class ApiPlugin  extends Plugin {
     {
 
     }
+
+    private String getFormattedDate(Date date) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        return dateFormat.format(date);
+    }
+
+    private Date parseFormattedDate(String str)
+    {
+        DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+        try {
+            return df.parse(str);
+        } catch (ParseException e) {
+            return new Date();
+        }
+    }
+
+    private String readConnection(HttpURLConnection connection) {
+        try {
+
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            StringBuilder htmlContent = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                htmlContent.append(line);
+            }
+            reader.close();
+            return htmlContent.toString();
+        }catch (Exception ignored) {}
+        return null;
+    }
     private  String getExecutionString(String url) {
         try {
             URL requestUrl = new URL(url);
@@ -32,34 +64,32 @@ public class ApiPlugin  extends Plugin {
             connection.setRequestMethod("POST");
             connection.setInstanceFollowRedirects(false);
 
-            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                StringBuilder htmlContent = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    htmlContent.append(line);
-                }
-                reader.close();
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK)
+            {
+                connection.disconnect();
+                return null;
+            }
 
-                String regex = "name=\"execution\"\\s+value=\"([^\"]+)\"\\s*";
-                Pattern pattern = Pattern.compile(regex);
-                Matcher matcher = pattern.matcher(htmlContent.toString());
+            String htmlContent = this.readConnection(connection);
+            if (htmlContent == null) {
+                connection.disconnect();
+                return null;
+            }
 
-                if (matcher.find() && matcher.groupCount() >= 1) {
-                    return matcher.group(1);
-                }
+            Pattern pattern = Pattern.compile("name=\"execution\"\\s+value=\"([^\"]+)\"\\s*");
+            Matcher matcher = pattern.matcher(htmlContent);
+            if (matcher.find() && matcher.groupCount() >= 1)
+            {
+                return matcher.group(1);
             }
             connection.disconnect();
-        } catch (IOException e) {
-            Log.e("SessionManager", "Error getting execution string: " + e.getMessage());
+        } catch (IOException ignored) {
         }
         return null;
     }
-    private String getFormattedDate(Date date) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        return dateFormat.format(date);
-    }
-    private String getSession(String url, String username, String password) {
+
+    private String getSession(String url, String username, String password)
+    {
         String execution = this.getExecutionString(url);
         if (execution == null) return null;
 
@@ -67,7 +97,7 @@ public class ApiPlugin  extends Plugin {
             URL requestUrl = new URL(url);
             HttpURLConnection connection = (HttpURLConnection) requestUrl.openConnection();
             connection.setRequestMethod("POST");
-            connection.setInstanceFollowRedirects(false);
+            connection.setInstanceFollowRedirects(true);
 
             connection.setDoOutput(true);
             connection.setRequestProperty("credentials", "include");
@@ -92,6 +122,7 @@ public class ApiPlugin  extends Plugin {
 
             if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 String cookies = connection.getHeaderField("Set-Cookie");
+
                 if (cookies != null && !cookies.isEmpty()) {
                     return cookies;
                 }
@@ -100,35 +131,23 @@ public class ApiPlugin  extends Plugin {
         } catch (IOException ignored) {}
         return null;
     }
-    private String getCalendarData(String base_url, String session, int projectId, int resourceId, Date startDate, Date endDate) {
+    private String getCalendarData(String base_url, int projectId, int resourceId, Date startDate, Date endDate) {
         try {
-            String d0Str = this.getFormattedDate(startDate);
-            String d1Str = this.getFormattedDate(endDate);
 
             String url = base_url +
                     "?resources=" + resourceId +
                     "&projectId=" + projectId +
                     "&calType=ical" +
-                    "&firstDate=" + d0Str +
-                    "&lastDate=" + d1Str;
+                    "&firstDate=" + this.getFormattedDate(startDate) +
+                    "&lastDate=" + this.getFormattedDate(endDate);
 
             URL requestUrl = new URL(url);
             HttpURLConnection connection = (HttpURLConnection) requestUrl.openConnection();
             connection.setRequestMethod("GET");
-            connection.setRequestProperty("Cookie", session);
 
-            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK)
-            {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                StringBuilder calendarData = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    calendarData.append(line);
-                }
-                reader.close();
-                return calendarData.toString();
-            }
+            String htmlContent = this.readConnection(connection);
             connection.disconnect();
+            return htmlContent;
         } catch (IOException ignored) {}
         return null;
     }
@@ -151,11 +170,10 @@ public class ApiPlugin  extends Plugin {
     {
         String data = this.getCalendarData(
                 call.getString("url"),
-                call.getString("session"),
                 call.getInt("projectId"),
                 call.getInt("resourceId"),
-                new Date(call.getLong("startDate")),
-                new Date(call.getLong("endDate"))
+                this.parseFormattedDate(call.getString("startDate")),
+                this.parseFormattedDate(call.getString("endDate"))
                 );
 
         JSObject ret = new JSObject();

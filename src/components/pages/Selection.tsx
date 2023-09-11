@@ -3,6 +3,9 @@ import { useCallback, useState } from "react";
 import "../styles/select.scss";
 
 type SelectionProps = {
+    storage: object;
+
+    setStorage: (value: object) => void;
     setPath: (path: string, rev: boolean) => void;
 };
 
@@ -103,13 +106,14 @@ const TreeSelection = ({
     );
 };
 
-export const Selection = ({ setPath }: SelectionProps) => {
+export const Selection = ({ storage, setStorage, setPath }: SelectionProps) => {
     const [resourceId, setResourceId] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(false);
-    const onValidate = useCallback(()=>{
+    const onValidate = useCallback(() => {
         setLoading(true);
-        setTimeout(()=>{
+        setTimeout(() => {
             setLoading(false);
+            setStorage({ ...storage, resourceId });
             setPath(`/planning/${resourceId}/${new Date().getTime()}`, false)
         }, 500);
     }, [resourceId, setPath])
