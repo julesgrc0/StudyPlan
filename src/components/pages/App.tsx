@@ -7,6 +7,7 @@ import { Plan } from './Plan';
 import { Selection } from './Selection';
 
 import '../styles/app.scss';
+import { DEFAULT_STORAGE } from '../def';
 
 export const App = () => {
     return <BrowserRouter>
@@ -23,12 +24,7 @@ const AnimatedRoutes = () => {
     const [nextPath, setNextPath] = useState(location.pathname);
 
     const [animation, setAnimation] = useState("page");
-    const [storage, setStorage] = useLocalStorage("_storage", {
-        session: null,
-        username: null,
-        password: null,
-        resourceId: 0
-    });
+    const [storage, setStorage] = useLocalStorage("_storage", DEFAULT_STORAGE);
 
 
     useEffect(() => {

@@ -119,9 +119,10 @@ export const Selection = ({ storage, setStorage, setPath }: SelectionProps) => {
     }, [resourceId, setPath])
     return (
         <div className="selection">
+           
             <div className="main">
-                <Heading mb="50px" textAlign={"center"}>
-                    Trouvez votre classe
+                <Heading mt="-100px" mb='80px' size='3xl' p='0px' textAlign={"left"} >
+                    Selectionner votre classe
                 </Heading>
                 <TreeSelection
                     tree={tree}

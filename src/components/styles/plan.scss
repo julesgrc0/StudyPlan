@@ -33,3 +33,13 @@
         }
     }
 }
+
+.chakra-button {
+
+    &:hover,
+    &:active {
+        background: black !important;
+        color: white;
+    }
+
+}

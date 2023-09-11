@@ -5,10 +5,18 @@ export type CourseItem = {
     summary: string;
     location: string;
     description: string;
+    time_info: string;
 }
 
 export type StorageData = {
     session: string | null;
     username: string | null;
     password: string | null;
+}
+
+export const DEFAULT_STORAGE = {
+    session: null,
+    username: null,
+    password: null,
+    resourceId: 0
 }
