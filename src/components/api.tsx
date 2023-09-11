@@ -28,19 +28,6 @@ export const getCalendarData = async (url: string, projectId: number, resourceId
 
     let data: string = objData.data.replace('\n', '<line>');
 
-    const fillFreeTime = (date0: Date | number, date1: Date | number ) =>
-    {
-        let diff = (typeof date0 == "number" ? date0 : date0.getHours()) - (typeof date1 == "number" ? date1 : date1.getHours());
-        for (let i = 0; i < diff; i++) {
-            courses.push({
-                is_course: false,
-                summary: "",
-                location: "",
-                description: "",
-                time_info: ""
-            })
-        }
-    }
 
     try {
 
@@ -66,9 +53,15 @@ export const getCalendarData = async (url: string, projectId: number, resourceId
                 return;
             }
 
-            if (next_start.getHours() !== 0 && next_start.getTime() != item.start.getTime()) {
-
-                fillFreeTime(item.start, next_start)
+            if (next_start.getHours() !== 0 && next_start.getTime() != item.start.getTime())
+            {
+                courses.push({
+                    is_course: false,
+                    summary: "",
+                    location: "",
+                    description: "",
+                    time_info: ""
+                })
             }
 
             let time_info = "";
@@ -85,7 +78,6 @@ export const getCalendarData = async (url: string, projectId: number, resourceId
 
             next_start = item.start;
 
-
             courses.push({
                 is_course: true,
                 summary: item.summary ?? "",
@@ -94,8 +86,6 @@ export const getCalendarData = async (url: string, projectId: number, resourceId
                 time_info
             })
         })
-
-        fillFreeTime(24, next_start);
     } catch { }
     return courses;
 }
