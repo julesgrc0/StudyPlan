@@ -44,16 +44,25 @@ export const getCalendarData = async (url: string, projectId: number, resourceId
 
     try {
 
-        const calendar: FullCalendar = ical.parseICS(data);
+        let calendar_data: FullCalendar = ical.parseICS(data);
+        let calendar_items: CalendarComponent[] = [];
+
+        Object.keys(calendar_data).map(item => calendar_items.push(calendar_data[item]));
+        
+        calendar_items = calendar_items.sort((a, b)=> {
+            if (!a.start || !b.start) {
+                return 0;
+            }
+            return a.start?.getTime() - b.start?.getTime();
+        })
+
 
         let next_start: Date = new Date();
         next_start.setHours(0, 0, 0, 0);
 
-        Object.keys(calendar).map((uuid: string) => {
-            const item: CalendarComponent = calendar[uuid];
-
-
-            if (!item.start || !item.end) {
+        calendar_items.map(item => {
+            if (!item.start || !item.end)
+            {
                 return;
             }
 
