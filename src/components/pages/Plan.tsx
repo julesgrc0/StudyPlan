@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import {
   Stat,
@@ -124,13 +124,13 @@ const HiddenStat = ({ children }: HiddenStatProps) => {
         <br />
         {show
           ? children.split("<line>").map((text) => {
-              return (
-                <>
-                  {text}
-                  <br />
-                </>
-              );
-            })
+            return (
+              <>
+                {text}
+                <br />
+              </>
+            );
+          })
           : null}
       </StatHelpText>
     </>
@@ -143,19 +143,31 @@ export default ({ storage, setPath, setStorage }: PlanProps) => {
   const [modalOpen, setOpenModal] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const d_date = useMemo(
-    () => (date ? new Date(parseInt(date)) : null),
-    [date]
-  );
-  const i_id = useMemo(() => (id ? parseInt(id) : null), [id]);
+  const [pageDate, setPageDate] = useState<Date | null>(null);
+  const [pageId, setPageId] = useState<number | null>(null);
+  const [displayDate, setDisplayDate] = useState<string>("");
 
-  useEffect(() => {
-    if (i_id == null || d_date == null) {
+  useEffect(()=>{
+    let newDate = date ? new Date(parseInt(date)) : null;
+    let newId = id ? parseInt(id) : null;
+
+
+    if (newDate == null || newId == null) 
+    {
       setPath("/", PageAnimationType.DEFAULT);
       return;
     }
 
-    getCalendarData(CALENDAR_URL, PROJECT_ID, i_id, d_date)
+    setPageDate(newDate)
+    setPageId(newId);
+
+    const today = new Date()
+    let addMonth = newDate.getMonth() != today.getMonth() ? `/${String(newDate.getMonth() + 1).padStart(2, '0')}` : ""
+    let addYear = newDate.getFullYear() != today.getFullYear() ? `/${newDate.getFullYear()}` : ""
+    
+    setDisplayDate(`${daysOfWeek[newDate.getDay()]} ${newDate.getDate()}${addMonth}${addYear}`);
+
+    getCalendarData(CALENDAR_URL, PROJECT_ID, newId, newDate)
       .then((calendar) => {
         setLoading(false);
         if (calendar == null) {
@@ -167,16 +179,18 @@ export default ({ storage, setPath, setStorage }: PlanProps) => {
       .catch(() => {
         setLoading(false);
       });
-  }, [d_date, i_id, storage, setPath]);
+
+  }, [date, id, storage])
+
 
   const onOperationDate = useCallback(
     (opt: number) => {
-      if (d_date == null) return;
+      if (pageDate == null) return;
 
-      d_date.setDate(d_date.getDate() + opt);
-      setPath(`/planning/${i_id}/${d_date.getTime()}`, PageAnimationType.SPEED);
+      pageDate.setDate(pageDate.getDate() + opt);
+      setPath(`/planning/${pageId}/${pageDate.getTime()}`, PageAnimationType.SPEED);
     },
-    [i_id, d_date, setPath]
+    [pageId, pageDate, setPath]
   );
 
   return (
@@ -198,7 +212,7 @@ export default ({ storage, setPath, setStorage }: PlanProps) => {
             fontSize={"2xl"}
             onClick={() => setOpenModal(true)}
           >
-            {daysOfWeek[d_date ? d_date.getDay() : 0]} {d_date?.getDate()}
+            {displayDate}
           </Text>
           <IconButton
             aria-label=""
@@ -245,8 +259,8 @@ export default ({ storage, setPath, setStorage }: PlanProps) => {
       <EditModal
         open={modalOpen}
         storage={storage}
-        resourceId={i_id ?? RESOURCE_ID_NONE}
-        date={d_date ?? new Date()}
+        resourceId={pageId ?? RESOURCE_ID_NONE}
+        date={pageDate ?? new Date()}
         setOpen={setOpenModal}
         setPath={setPath}
         setStorage={setStorage}
