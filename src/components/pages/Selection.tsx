@@ -28,7 +28,7 @@ const TreeSelection = ({
     if (selected === undefined) {
         return (
             <>
-                <Select value={value} onChange={(e) => setValue(e.target.value)}>
+                <Select value={value} onChange={(e) => setValue(e.target.value)} disabled={resourceId !== RESOURCE_ID_NONE}>
                     {Object.keys(tree).map((key: string, index: number) => (
                         <option key={index} value={key}>
                             {key}
@@ -113,6 +113,7 @@ export default ({ storage, setStorage, setPath }: SelectionProps) => {
                     resourceId={resourceId}
                     setResourceId={setResourceId}
                 />
+                
                 {resourceId !== RESOURCE_ID_NONE && (
                     <Button
                         className="select-btn"
@@ -122,6 +123,17 @@ export default ({ storage, setStorage, setPath }: SelectionProps) => {
                         isLoading={loading}
                     >
                         Valider
+                    </Button>
+                )}
+                {resourceId !== RESOURCE_ID_NONE && (
+                    <Button
+                        className="select-btn"
+                        colorScheme='gray'
+                        onClick={()=>{
+                            setResourceId(RESOURCE_ID_NONE);
+                        }}
+                    >
+                        Retour
                     </Button>
                 )}
             </div>
