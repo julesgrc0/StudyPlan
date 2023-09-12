@@ -1,21 +1,15 @@
 # StudyPlan
 
-
 <img src="./images/icon.png" style="width: 100px;" />
 
 StudyPlan is a mobile application for Android that retrieves a university's timetable. For the moment the App is mainly dedicated to the University of Rennes 1, but it can easily be adapted to any other school.
 
-
 ## Application View
 
-|           1            |              2              |
-| :--------------------: | :-------------------------: |
-| ![](./images/home.png) | ![](./images/selection.png) |
-
-|             3              |             4              |
-| :------------------------: | :------------------------: |
-| ![](./images/planning.png) | ![](./images/settings.png) |
-
+|                            |                             |
+| :------------------------: | :-------------------------: |
+|   ![](./images/home.png)   | ![](./images/selection.png) |
+| ![](./images/planning.png) | ![](./images/settings.png)  |
 
 ## How to add a university?
 
@@ -58,7 +52,6 @@ const CALENDAR_URL = `https://${BASE_URL}/jsp/custom/modules/plannings/anonymous
 > ./src/assets/logo.svg
 
 <img src="./src/assets/logo.svg" style="width: 200px; background: white;" />
-
 
 ### Build
 
