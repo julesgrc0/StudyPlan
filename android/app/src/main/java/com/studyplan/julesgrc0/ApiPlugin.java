@@ -24,91 +24,7 @@ import java.util.stream.Collectors;
 
 @CapacitorPlugin(name="ApiPlugin")
 public class ApiPlugin  extends Plugin {
-    public ApiPlugin()
-    {
-
-    }
-
-    /*private  String getExecutionString(String url) {
-        try {
-            URL requestUrl = new URL(url);
-            HttpURLConnection connection = (HttpURLConnection) requestUrl.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setInstanceFollowRedirects(true);
-
-            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK)
-            {
-                connection.disconnect();
-                return null;
-            }
-
-            String htmlContent = this.readConnection(connection);
-            if (htmlContent == null) {
-                connection.disconnect();
-                return null;
-            }
-
-            Pattern pattern = Pattern.compile("name=\"execution\"\\s+value=\"([^\"]+)\"\\s*");
-            Matcher matcher = pattern.matcher(htmlContent);
-            if (matcher.find() && matcher.groupCount() >= 1)
-            {
-                return matcher.group(1);
-            }
-            connection.disconnect();
-        } catch (IOException ignored) {
-        }
-        return null;
-    }
-
-    private String getSession(String url, String username, String password)
-    {
-        String execution = this.getExecutionString(url);
-        if (execution == null) return null;
-
-        try {
-            URL requestUrl = new URL(url);
-            HttpURLConnection connection = (HttpURLConnection) requestUrl.openConnection();
-            connection.setRequestMethod("POST");
-            connection.setInstanceFollowRedirects(true);
-
-            connection.setDoOutput(true);
-            connection.setRequestProperty("credentials", "include");
-
-            StringBuilder postData = new StringBuilder();
-            postData.append("username=").append(username);
-            postData.append("&password=").append(password);
-            postData.append("&execution=").append(execution);
-            postData.append("&_eventId=submit");
-            postData.append("&geolocation=");
-
-            byte[] postDataBytes = postData.toString().getBytes("UTF-8");
-            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            connection.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
-            connection.setRequestProperty("Accept-Language", "fr-FR");
-            connection.setRequestProperty("Origin", url);
-
-            OutputStream os = connection.getOutputStream();
-            os.write(postDataBytes);
-            os.flush();
-            os.close();
-
-            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                String cookies = connection.getHeaderField("Set-Cookie");
-
-                if (cookies != null && !cookies.isEmpty()) {
-                    return cookies;
-                }
-            }
-            connection.disconnect();
-        } catch (IOException ignored) {}
-        return null;
-    }*/
-    private String getSession(String url, String username, String password)
-    {
-        try{
-            Thread.sleep(500);
-        }catch (Exception ignored) {}
-        return "session";
+    public ApiPlugin() {
     }
 
     private String getCalendarData(String base_url, int projectId, int resourceId, String date) {
@@ -136,19 +52,6 @@ public class ApiPlugin  extends Plugin {
             return htmlContent.toString();
         } catch (IOException ignored) {}
         return null;
-    }
-
-    @PluginMethod
-    public void plugin_getSession(PluginCall call)
-    {
-        String session = this.getSession(
-                call.getString("url"),
-                call.getString("username"),
-                call.getString("password"));
-
-        JSObject ret = new JSObject();
-        ret.put("session", session);
-        call.resolve(ret);
     }
 
     @PluginMethod

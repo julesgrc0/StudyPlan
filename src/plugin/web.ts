@@ -1,20 +1,11 @@
 import { WebPlugin } from "@capacitor/core";
-import type { ApiPlugin, SessionDataObject, CalendarDataObject } from "./definitions";
+import type { ApiPlugin, CalendarDataObject } from "./definitions";
 
 export class ApiPluginWeb extends WebPlugin implements ApiPlugin {
     constructor() {
         super();
     }
 
-
-    public plugin_getSession(_data: object): Promise<SessionDataObject | null>
-    {
-        return new Promise((res) => {
-            setTimeout(()=>{
-                res({session: "FAKE_SESSION"})
-            }, 1000)
-        });
-    }
     
     public plugin_getCalendarData(_data: object): Promise<CalendarDataObject | null>
     {

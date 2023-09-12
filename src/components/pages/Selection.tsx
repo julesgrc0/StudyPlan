@@ -1,38 +1,26 @@
 import { Select, Button, Kbd, Heading } from "@chakra-ui/react";
 import { useCallback, useEffect, useState } from "react";
 
+import {
+    PageAnimationType,
+    RESOURCE_ID_NONE,
+    SelectionProps,
+    StorageData,
+    TreeItem,
+    TreeSelectionProps,
+} from "../def";
+
+import logo from "../../assets/logo.svg";
+import tree from "../../assets/tree.json";
 
 import "../styles/select.scss";
-import { DEFAULT_STORAGE, PageAnimationType, StorageData } from "../def";
-import logo from '../../assets/logo.svg'
-import tree from '../../assets/tree.json'
 
 // const tree: TreeItem = (await import('../../assets/tree.json')).default;
-
-type SelectionProps = {
-    storage: object;
-
-    setStorage: (value: object) => void;
-    setPath: (path: string, type: PageAnimationType) => void;
-};
-
-type TreeItem = {
-    [key: string]: TreeItem | number;
-};
-
-type TreeSelectionProps = {
-    tree: TreeItem;
-    resourceId: number;
-    setResourceId: (id: number) => void;
-    onGoBack?: () => void;
-};
-
 
 const TreeSelection = ({
     tree,
     resourceId,
     setResourceId,
-    onGoBack
 }: TreeSelectionProps) => {
     const [selected, setSelected] = useState<TreeItem | undefined>(undefined);
     const [value, setValue] = useState<string>(Object.keys(tree)[0]);
@@ -47,7 +35,7 @@ const TreeSelection = ({
                         </option>
                     ))}
                 </Select>
-                {resourceId == 0 && (
+                {resourceId === RESOURCE_ID_NONE && (
                     <Button
                         bg="black"
                         colorScheme="blackAlpha"
@@ -65,11 +53,6 @@ const TreeSelection = ({
                         Selectionner
                     </Button>
                 )}
-                {(resourceId === 0 && onGoBack !== undefined) && <Button
-                    className="select-btn"
-                    onClick={onGoBack}>
-                    Retour
-                </Button>}
             </>
         );
     }
@@ -83,8 +66,8 @@ const TreeSelection = ({
                 p="0px"
                 size={"sm"}
                 onClick={() => {
-                    setResourceId(0)
-                    setSelected(undefined)
+                    setResourceId(RESOURCE_ID_NONE);
+                    setSelected(undefined);
                 }}
             >
                 <Kbd>{value}</Kbd>
@@ -93,7 +76,6 @@ const TreeSelection = ({
                 tree={selected}
                 resourceId={resourceId}
                 setResourceId={setResourceId}
-                onGoBack={undefined}
             />
         </>
     );
@@ -103,40 +85,35 @@ export default ({ storage, setStorage, setPath }: SelectionProps) => {
     const [resourceId, setResourceId] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(false);
 
-    useEffect(()=>{
-        setResourceId((storage as StorageData).resourceId)
-    }, [storage])
-
-    const onGoBack = useCallback(()=>{
-        setResourceId(0);
-        setLoading(false);
-        setStorage(DEFAULT_STORAGE);
-        setPath("/", PageAnimationType.REVERSE);
-    }, [setPath, setResourceId, setLoading, setStorage])
+    useEffect(() => {
+        setResourceId((storage as StorageData).resourceId);
+    }, [storage]);
 
     const onValidate = useCallback(() => {
         setLoading(true);
         setTimeout(() => {
             setLoading(false);
             setStorage({ ...storage, resourceId });
-            setPath(`/planning/${resourceId}/${new Date().getTime()}`, PageAnimationType.DEFAULT)
+            setPath(
+                `/planning/${resourceId}/${new Date().getTime()}`,
+                PageAnimationType.DEFAULT
+            );
         }, 500);
     }, [resourceId, setPath]);
 
     return (
         <div className="selection">
-            <img src={logo} className='logo' />
+            <img src={logo} className="logo" />
             <div className="main">
-                <Heading  mb='30px' size='lg' textAlign={"center"} >
+                <Heading mb="30px" size="lg" textAlign={"center"}>
                     Selectionner votre classe
                 </Heading>
                 <TreeSelection
                     tree={tree}
                     resourceId={resourceId}
                     setResourceId={setResourceId}
-                    onGoBack={onGoBack}
                 />
-                {resourceId != 0 && (
+                {resourceId !== RESOURCE_ID_NONE && (
                     <Button
                         className="select-btn"
                         bg="black"

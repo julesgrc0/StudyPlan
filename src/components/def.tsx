@@ -14,15 +14,56 @@ export type CourseItem = {
 }
 
 export type StorageData = {
-    session: string | null;
-    username: string | null;
-    password: string | null;
     resourceId: number;
 }
 
+export type TreeItem = {
+    [key: string]: TreeItem | number;
+};
+
+export const daysOfWeek = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
+ 
+
+export const RESOURCE_ID_NONE: number = 0;
+
 export const DEFAULT_STORAGE: StorageData = {
-    session: null,
-    username: null,
-    password: null,
-    resourceId: 0
+    resourceId: RESOURCE_ID_NONE
 }
+
+export type HiddenStatProps = {
+    children: string;
+}
+
+export type EditModalProps = {
+    date: Date;
+    open: boolean;
+    resourceId: number;
+    
+    storage: StorageData;
+    setStorage: (value: StorageData) => void;
+
+    setOpen: (value: boolean) => void;
+    setPath: (path: string, type: PageAnimationType) => void;
+}
+
+export type PlanProps = {
+    storage: StorageData;
+    setStorage: (value: StorageData) => void;
+
+    setPath: (path: string, type: PageAnimationType) => void;
+}
+
+export type SelectionProps = {
+    storage: StorageData;
+    setStorage: (value: StorageData) => void;
+
+    setPath: (path: string, type: PageAnimationType) => void;
+};
+
+export type TreeSelectionProps = {
+    tree: TreeItem;
+    resourceId: number;
+    setResourceId: (id: number) => void;
+};
+
+

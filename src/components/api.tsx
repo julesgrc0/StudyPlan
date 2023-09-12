@@ -1,20 +1,13 @@
 import { CalendarComponent, FullCalendar } from '../lib/index';
 import ical from '../lib/ical';
 
-import { ApiPlugin, CalendarDataObject, SessionDataObject } from '../plugin/index';
+import { ApiPlugin, CalendarDataObject } from '../plugin/index';
 import { CourseItem } from './def';
 
-export const LOGIN_URL = 'https://sso-cas.univ-rennes1.fr/login?service=https://ent.univ-rennes1.fr/Login'
 export const CALENDAR_URL = 'https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/anonymous_cal.jsp'
 export const PROJECT_ID = 1;
 
 
-export const getSession = async (url: string, username: string, password: string) => {
-    let session: SessionDataObject | null = await ApiPlugin.plugin_getSession({
-        url, username, password
-    })
-    return session?.session ?? null;
-}
 
 export const formateDate = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 

@@ -2,9 +2,8 @@ import { useState, useCallback, useEffect, lazy } from 'react';
 import { BrowserRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
 import { useLocalStorage } from '../storage';
-import { DEFAULT_STORAGE, PageAnimationType } from '../def';
+import { DEFAULT_STORAGE, PageAnimationType, RESOURCE_ID_NONE } from '../def';
 
-const Login = lazy(()=> import('./Login'))
 const Plan = lazy(() => import('./Plan'))
 const Selection = lazy(() => import('./Selection'))
 
@@ -25,25 +24,24 @@ const AnimatedRoutes = () => {
     const [nextPath, setNextPath] = useState(location.pathname);
 
     const [animation, setAnimation] = useState("page");
-    const [storage, setStorage] = useLocalStorage("_storage", DEFAULT_STORAGE);
+    const { storage, setStorage } = useLocalStorage("_storage", DEFAULT_STORAGE);
 
 
     useEffect(() => {
-        if(storage.session != null)
+        if (storage.resourceId !== RESOURCE_ID_NONE)
         {
             let next = `/planning/${storage.resourceId}/${new Date().getTime()}`;
             navigate(next)
             setPath(next)
         }
     }, [])
-    
+
     const onChangePath = useCallback((path: string, type: PageAnimationType) => {
-        if (type == PageAnimationType.SPEED)
-        {
+        if (type == PageAnimationType.SPEED) {
             setPath(path);
             setNextPath(path);
             navigate(path);
-        }else{
+        } else {
             setAnimation("page-out" + type);
             setNextPath(path);
         }
@@ -53,17 +51,15 @@ const AnimatedRoutes = () => {
     return <div
         className={animation}
         onAnimationEnd={() => {
-            if (animation.includes("out")) 
-            {
-                setAnimation(animation.replace('out','in'));
+            if (animation.includes("out")) {
+                setAnimation(animation.replace('out', 'in'));
                 setPath(nextPath);
                 navigate(nextPath)
             }
         }}
     >
         <Routes location={path}>
-            <Route path="/" element={<Login storage={storage} setStorage={setStorage} setPath={onChangePath} />} />
-            <Route path="/selection" element={<Selection setPath={onChangePath} storage={storage} setStorage={setStorage} />}  />
+            <Route path="/" element={<Selection setPath={onChangePath} storage={storage} setStorage={setStorage} />} />
             <Route path="/planning/:id/:date" element={<Plan storage={storage} setStorage={setStorage} setPath={onChangePath} />} />
         </Routes>
     </div>
