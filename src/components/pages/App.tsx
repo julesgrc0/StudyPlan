@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes, useLocation, useNavigate } from 'react-ro
 
 import { useLocalStorage } from '../storage';
 import { DEFAULT_STORAGE, PageAnimationType, RESOURCE_ID_NONE } from '../def';
+import { LocalNotifications } from '@capacitor/local-notifications';
 
 const Plan = lazy(() => import('./Plan'))
 const Selection = lazy(() => import('./Selection'))
@@ -34,6 +35,18 @@ const AnimatedRoutes = () => {
             navigate(next)
             setPath(next)
         }
+        
+        if (storage.notification)
+        {
+            LocalNotifications.checkPermissions().then(status => {
+                if (status.display !== 'granted') {
+                    LocalNotifications.requestPermissions().then(res => {
+                        setStorage({ ...storage, notification: res.display === 'granted' })
+                    })
+                }
+            })
+        }
+        
     }, [])
 
     const onChangePath = useCallback((path: string, type: PageAnimationType) => {

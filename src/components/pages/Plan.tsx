@@ -25,7 +25,6 @@ import { Network } from '@capacitor/network';
 import { SingleDatepicker } from "chakra-dayzed-datepicker";
 import {
   CourseItem,
-  DEFAULT_STORAGE,
   EditModalProps,
   HiddenStatProps,
   PageAnimationType,
@@ -34,6 +33,7 @@ import {
   daysOfWeek,
 } from "../def";
 import { CALENDAR_URL, PROJECT_ID, getCalendarData } from "../api";
+import { LocalNotifications } from '@capacitor/local-notifications';
 
 import "../styles/plan.scss";
 
@@ -41,6 +41,7 @@ const EditModal = ({
   open,
   date,
   resourceId,
+  storage,
   setOpen,
   setPath,
   setStorage,
@@ -83,7 +84,7 @@ const EditModal = ({
               colorScheme="gray"
               onClick={() => {
                 setOpen(false);
-                setStorage(DEFAULT_STORAGE);
+                setStorage({ ...storage, resourceId: 0 });
                 setPath("/", PageAnimationType.REVERSE);
               }}
             >
@@ -149,13 +150,12 @@ export default ({ storage, setPath, setStorage }: PlanProps) => {
 
   const [isConnected, setIsConnected] = useState<boolean>(true);
 
-  useEffect(()=>{
+  useEffect(() => {
     let newDate = date ? new Date(parseInt(date)) : null;
     let newId = id ? parseInt(id) : null;
 
-
-    if (newDate == null || newId == null) 
-    {
+  
+    if (newDate == null || newId == null) {
       setPath("/", PageAnimationType.DEFAULT);
       return;
     }
@@ -166,7 +166,7 @@ export default ({ storage, setPath, setStorage }: PlanProps) => {
     const today = new Date()
     let addMonth = newDate.getMonth() != today.getMonth() ? `/${String(newDate.getMonth() + 1).padStart(2, '0')}` : ""
     let addYear = newDate.getFullYear() != today.getFullYear() ? `/${newDate.getFullYear()}` : ""
-    
+
     setDisplayDate(`${daysOfWeek[newDate.getDay()]} ${newDate.getDate()}${addMonth}${addYear}`);
 
     getCalendarData(CALENDAR_URL, PROJECT_ID, newId, newDate)
@@ -184,9 +184,9 @@ export default ({ storage, setPath, setStorage }: PlanProps) => {
 
   }, [date, id, storage, isConnected])
 
-  useEffect(()=>{
+  useEffect(() => {
 
-    Network.getStatus().then(status=>{
+    Network.getStatus().then(status => {
       setIsConnected(status.connected);
     })
 
@@ -194,7 +194,7 @@ export default ({ storage, setPath, setStorage }: PlanProps) => {
       setIsConnected(status.connected);
     });
 
-    return ()=>{
+    return () => {
       Network.removeAllListeners();
     }
   }, [])
@@ -208,6 +208,45 @@ export default ({ storage, setPath, setStorage }: PlanProps) => {
     },
     [pageId, pageDate, setPath]
   );
+
+  const setReminder = useCallback((item: CourseItem, set: boolean) => {
+    let newReminders = storage.reminders;
+    newReminders[item.time.getTime()] = set;
+
+    setStorage({
+      ...storage,
+      reminders: newReminders
+    })
+    
+    if(set)
+    {
+      LocalNotifications.schedule({
+        notifications: [
+          {
+            title: item.summary,
+            body: item.location,
+            largeBody: item.description,
+            id: item.time.getTime(),
+            schedule: {
+              at: item.time,
+              allowWhileIdle: true
+            }
+          }
+        ]
+      })
+    }else{
+      LocalNotifications.cancel({
+        notifications: [
+          {
+            id: item.time.getTime()
+          }
+        ]
+      })
+    }
+   
+  }, [storage, setStorage]);
+
+  
 
   return (
     <div className="plan">
@@ -266,6 +305,38 @@ export default ({ storage, setPath, setStorage }: PlanProps) => {
                   <StatHelpText>{item.time_info}</StatHelpText>
                   {item.description.length > 0 && (
                     <HiddenStat>{item.description}</HiddenStat>
+                  )}
+                  {(storage.notification && index == 0) && (
+                    storage.reminders[item.time.getTime()] ? <>
+
+                      <Button
+                        onClick={() => setReminder(item, false)}
+                        size={"xs"}
+                        bg='red'
+                        colorScheme='red'
+                        fontWeight={"bold"}
+                        mt="10px"
+                        mb="15px"
+                        _hover={{
+                          background: 'red'
+                        }}
+                      >
+                        supprimer le rappel
+                      </Button>
+                    </> : <>
+
+                      <Button
+                        onClick={() => setReminder(item, true)}
+                        size={"xs"}
+                        bg='black'
+                        colorScheme='blackAlpha'
+                        fontWeight={"bold"}
+                        mt="10px"
+                        mb="15px"
+                      >
+                        ajouter un rappel
+                      </Button>
+                    </>
                   )}
                 </Stat>
               </div>

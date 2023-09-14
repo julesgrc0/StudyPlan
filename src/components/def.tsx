@@ -11,9 +11,14 @@ export type CourseItem = {
     location: string;
     description: string;
     time_info: string;
+    time: Date;
 }
 
 export type StorageData = {
+    notification: boolean;
+    reminders: {
+        [key: number]: boolean;
+    };
     resourceId: number;
 }
 
@@ -27,6 +32,8 @@ export const daysOfWeek = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "V
 export const RESOURCE_ID_NONE: number = 0;
 
 export const DEFAULT_STORAGE: StorageData = {
+    notification: true,
+    reminders: {},
     resourceId: RESOURCE_ID_NONE
 }
 

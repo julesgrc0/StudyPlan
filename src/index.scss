@@ -7,4 +7,9 @@ html, body {
     top: 0;
     left: 0;
     background: #ffffff;
+    -webkit-tap-highlight-color: transparent;
+}
+
+* {
+    -webkit-tap-highlight-color: transparent;
 }

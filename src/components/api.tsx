@@ -53,7 +53,8 @@ export const getCalendarData = async (url: string, projectId: number, resourceId
                     summary: "",
                     location: "",
                     description: "",
-                    time_info: ""
+                    time_info: "",
+                    time: new Date()
                 })
             }
 
@@ -76,7 +77,8 @@ export const getCalendarData = async (url: string, projectId: number, resourceId
                 summary: item.summary ?? "",
                 location: item.location ?? "",
                 description: item.description ?? "",
-                time_info
+                time_info,
+                time: item.start
             })
         })
     } catch { }
