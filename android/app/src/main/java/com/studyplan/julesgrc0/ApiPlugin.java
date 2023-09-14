@@ -29,12 +29,7 @@ public class ApiPlugin  extends Plugin {
 
     private String getCalendarData(String base_url, int projectId, int resourceId, String date) {
         try {
-            String url = base_url +
-                    "?resources=" + resourceId +
-                    "&projectId=" + projectId +
-                    "&calType=ical" +
-                    "&firstDate=" +  date +
-                    "&lastDate=" + date;
+            String url = base_url+"?projectId="+ projectId + "&calType=ical&resources="+resourceId  +"&firstDate="+date+"&lastDate="+date;
 
             URL requestUrl = new URL(url);
             HttpURLConnection connection = (HttpURLConnection) requestUrl.openConnection();

@@ -4,7 +4,7 @@ import ical from '../lib/ical';
 import { ApiPlugin, CalendarDataObject } from '../plugin/index';
 import { CourseItem } from './def';
 
-export const CALENDAR_URL = 'https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/anonymous_cal.jsp'
+export const CALENDAR_URL = 'https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/cal.jsp'
 export const PROJECT_ID = 1;
 
 
