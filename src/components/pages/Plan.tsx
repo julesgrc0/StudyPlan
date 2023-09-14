@@ -318,7 +318,7 @@ export default ({ storage, setPath, setStorage }: PlanProps) => {
                         mt="10px"
                         mb="15px"
                         _hover={{
-                          background: 'red'
+                          background: 'red !important'
                         }}
                       >
                         supprimer le rappel
