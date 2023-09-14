@@ -18,10 +18,10 @@ import {
   ModalCloseButton,
   VStack,
   Divider,
-  Spinner,
+  Spinner
 } from "@chakra-ui/react";
-import { ArrowBackIcon, ArrowForwardIcon } from "@chakra-ui/icons";
-
+import { ArrowBackIcon, ArrowForwardIcon, WarningTwoIcon } from "@chakra-ui/icons";
+import { Network } from '@capacitor/network';
 import { SingleDatepicker } from "chakra-dayzed-datepicker";
 import {
   CourseItem,
@@ -147,6 +147,8 @@ export default ({ storage, setPath, setStorage }: PlanProps) => {
   const [pageId, setPageId] = useState<number | null>(null);
   const [displayDate, setDisplayDate] = useState<string>("");
 
+  const [isConnected, setIsConnected] = useState<boolean>(true);
+
   useEffect(()=>{
     let newDate = date ? new Date(parseInt(date)) : null;
     let newId = id ? parseInt(id) : null;
@@ -180,8 +182,22 @@ export default ({ storage, setPath, setStorage }: PlanProps) => {
         setLoading(false);
       });
 
-  }, [date, id, storage])
+  }, [date, id, storage, isConnected])
 
+  useEffect(()=>{
+
+    Network.getStatus().then(status=>{
+      setIsConnected(status.connected);
+    })
+
+    Network.addListener('networkStatusChange', (status) => {
+      setIsConnected(status.connected);
+    });
+
+    return ()=>{
+      Network.removeAllListeners();
+    }
+  }, [])
 
   const onOperationDate = useCallback(
     (opt: number) => {
@@ -225,7 +241,19 @@ export default ({ storage, setPath, setStorage }: PlanProps) => {
           />
         </HStack>
       </div>
-      {!loading && (
+      {!isConnected && <>
+        <VStack
+          pos={"absolute"}
+          top={"50%"}
+          left={"50%"}
+          transform={"translate(-50%,-50%)"}
+          opacity={0.5}
+        >
+          <WarningTwoIcon boxSize={'40px'} />
+          <p>Pas de connexion internet</p>
+        </VStack>
+      </>}
+      {(!loading && isConnected) && (
         <div className="scroll-section">
           {items.map((item, index) =>
             !item.is_course ? (
@@ -245,7 +273,7 @@ export default ({ storage, setPath, setStorage }: PlanProps) => {
           )}
         </div>
       )}
-      {loading && (
+      {(loading && isConnected) && (
         <VStack
           pos={"absolute"}
           top={"50%"}
