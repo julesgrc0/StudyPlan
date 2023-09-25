@@ -18,10 +18,15 @@ import {
   ModalCloseButton,
   VStack,
   Divider,
-  Spinner
+  Spinner,
 } from "@chakra-ui/react";
-import { ArrowBackIcon, ArrowForwardIcon, WarningTwoIcon } from "@chakra-ui/icons";
-import { Network } from '@capacitor/network';
+import {
+  ArrowBackIcon,
+  ArrowForwardIcon,
+  WarningTwoIcon,
+} from "@chakra-ui/icons";
+import { MdAlarmOn, MdAlarmOff } from "react-icons/md";
+import { Network } from "@capacitor/network";
 import { SingleDatepicker } from "chakra-dayzed-datepicker";
 import {
   CourseItem,
@@ -33,8 +38,8 @@ import {
   daysOfWeek,
 } from "../def";
 import { CALENDAR_URL, PROJECT_ID, getCalendarData } from "../api";
-import { LocalNotifications } from '@capacitor/local-notifications';
 
+import { LocalNotifications } from "@capacitor/local-notifications";
 import "../styles/plan.scss";
 
 const EditModal = ({
@@ -110,33 +115,30 @@ const EditModal = ({
 const HiddenStat = ({ children }: HiddenStatProps) => {
   const [show, setShow] = useState(false);
 
-  return (
-    <>
-      <StatHelpText>
-        <Button
-          onClick={() => setShow(!show)}
-          size={"xs"}
-          fontWeight={"bold"}
-          mt="10px"
-          mb="15px"
-        >
-          {show ? "masquer" : "voir plus"}
-        </Button>
-        <br />
-        {show
-          ? children.split("<line>").map((text) => {
-            return (
-              <>
-                {text}
-                <br />
-              </>
-            );
-          })
-          : null}
-      </StatHelpText>
-    </>
-  );
-};
+  return <StatHelpText>
+    <Button
+      onClick={() => setShow(!show)}
+      size={"xs"}
+      fontWeight={"bold"}
+
+    >
+      {show ? "masquer" : "voir plus"}
+    </Button>
+    <br />
+    {show
+      ? children.split("<line>").map((text, index) => {
+        return (
+          <Text key={index}>
+            {text}
+            <br />
+          </Text>
+        );
+      })
+      : null}
+  </StatHelpText>
+}
+
+const IdDate = (date: Date): number => parseInt(`${date.getMonth() + 1}${date.getDate() + 1}${date.getHours()}${date.getMinutes()}${date.getSeconds()}`)
 
 export default ({ storage, setPath, setStorage }: PlanProps) => {
   const { id, date } = useParams();
@@ -154,20 +156,28 @@ export default ({ storage, setPath, setStorage }: PlanProps) => {
     let newDate = date ? new Date(parseInt(date)) : null;
     let newId = id ? parseInt(id) : null;
 
-  
     if (newDate == null || newId == null) {
       setPath("/", PageAnimationType.DEFAULT);
       return;
     }
 
-    setPageDate(newDate)
+    setPageDate(newDate);
     setPageId(newId);
 
-    const today = new Date()
-    let addMonth = newDate.getMonth() != today.getMonth() ? `/${String(newDate.getMonth() + 1).padStart(2, '0')}` : ""
-    let addYear = newDate.getFullYear() != today.getFullYear() ? `/${newDate.getFullYear()}` : ""
+    const today = new Date();
+    let addMonth =
+      newDate.getMonth() != today.getMonth()
+        ? `/${String(newDate.getMonth() + 1).padStart(2, "0")}`
+        : "";
+    let addYear =
+      newDate.getFullYear() != today.getFullYear()
+        ? `/${newDate.getFullYear()}`
+        : "";
 
-    setDisplayDate(`${daysOfWeek[newDate.getDay()]} ${newDate.getDate()}${addMonth}${addYear}`);
+    setDisplayDate(
+      `${daysOfWeek[newDate.getDay()]
+      } ${newDate.getDate()}${addMonth}${addYear}`
+    );
 
     getCalendarData(CALENDAR_URL, PROJECT_ID, newId, newDate)
       .then((calendar) => {
@@ -181,72 +191,81 @@ export default ({ storage, setPath, setStorage }: PlanProps) => {
       .catch(() => {
         setLoading(false);
       });
-
-  }, [date, id, storage, isConnected])
+  }, [date, id, storage, isConnected]);
 
   useEffect(() => {
-
-    Network.getStatus().then(status => {
+    Network.getStatus().then((status) => {
       setIsConnected(status.connected);
-    })
+    });
 
-    Network.addListener('networkStatusChange', (status) => {
+    Network.addListener("networkStatusChange", (status) => {
       setIsConnected(status.connected);
     });
 
     return () => {
       Network.removeAllListeners();
+    };
+  }, []);
+
+  const createNotification = useCallback((item: CourseItem) => {
+    if(item.time.getTime() < new Date().getTime())
+    {
+      return;
     }
-  }, [])
+
+    LocalNotifications.schedule({
+      notifications: [
+        {
+          title: item.summary,
+          body: item.location,
+          largeBody: item.description,
+          id: IdDate(item.time),
+          schedule: {
+            at: item.time,
+            allowWhileIdle: true,
+          },
+        },
+      ],
+    })
+  }, []);
+
+  const removeNotification = useCallback((item: CourseItem) => {
+    LocalNotifications.cancel({
+      notifications: [
+        {
+          id: IdDate(item.time),
+        },
+      ],
+    })
+  }, []);
 
   const onOperationDate = useCallback(
     (opt: number) => {
       if (pageDate == null) return;
 
       pageDate.setDate(pageDate.getDate() + opt);
-      setPath(`/planning/${pageId}/${pageDate.getTime()}`, PageAnimationType.SPEED);
+      setPath(
+        `/planning/${pageId}/${pageDate.getTime()}`,
+        PageAnimationType.SPEED
+      );
     },
     [pageId, pageDate, setPath]
   );
 
-  const setReminder = useCallback((item: CourseItem, set: boolean) => {
-    let newReminders = storage.reminders;
-    newReminders[item.time.getTime()] = set;
+  const setReminder = useCallback(
+    (item: CourseItem, set: boolean) => {
+      let newReminders = storage.reminders;
+      newReminders[item.time.getTime()] = set;
 
-    setStorage({
-      ...storage,
-      reminders: newReminders
-    })
-    
-    if(set)
-    {
-      LocalNotifications.schedule({
-        notifications: [
-          {
-            title: item.summary,
-            body: item.location,
-            largeBody: item.description,
-            id: item.time.getTime(),
-            schedule: {
-              at: item.time,
-              allowWhileIdle: true
-            }
-          }
-        ]
-      })
-    }else{
-      LocalNotifications.cancel({
-        notifications: [
-          {
-            id: item.time.getTime()
-          }
-        ]
-      })
-    }
-   
-  }, [storage, setStorage]);
+      setStorage({
+        ...storage,
+        reminders: newReminders,
+      });
 
-  
+      set ? createNotification(item) : removeNotification(item);
+    },
+    [storage, setStorage, createNotification, removeNotification]
+  );
 
   return (
     <div className="plan">
@@ -280,19 +299,21 @@ export default ({ storage, setPath, setStorage }: PlanProps) => {
           />
         </HStack>
       </div>
-      {!isConnected && <>
-        <VStack
-          pos={"absolute"}
-          top={"50%"}
-          left={"50%"}
-          transform={"translate(-50%,-50%)"}
-          opacity={0.5}
-        >
-          <WarningTwoIcon boxSize={'40px'} />
-          <p>Pas de connexion internet</p>
-        </VStack>
-      </>}
-      {(!loading && isConnected) && (
+      {!isConnected && (
+        <>
+          <VStack
+            pos={"absolute"}
+            top={"50%"}
+            left={"50%"}
+            transform={"translate(-50%,-50%)"}
+            opacity={0.5}
+          >
+            <WarningTwoIcon boxSize={"40px"} />
+            <p>Pas de connexion internet</p>
+          </VStack>
+        </>
+      )}
+      {!loading && isConnected && (
         <div className="scroll-section">
           {items.map((item, index) =>
             !item.is_course ? (
@@ -302,49 +323,58 @@ export default ({ storage, setPath, setStorage }: PlanProps) => {
                 <Stat>
                   <StatLabel>{item.location}</StatLabel>
                   <StatNumber>{item.summary}</StatNumber>
-                  <StatHelpText>{item.time_info}</StatHelpText>
+                  <StatHelpText mb='20px'>{item.time_info}</StatHelpText>
+
                   {item.description.length > 0 && (
                     <HiddenStat>{item.description}</HiddenStat>
                   )}
                   {(storage.notification && index == 0) && (
-                    storage.reminders[item.time.getTime()] ? <>
-
-                      <Button
-                        onClick={() => setReminder(item, false)}
-                        size={"xs"}
-                        bg='red'
-                        colorScheme='red'
-                        fontWeight={"bold"}
-                        mt="10px"
-                        mb="15px"
-                        _hover={{
-                          background: 'red !important'
-                        }}
-                      >
-                        supprimer le rappel
-                      </Button>
-                    </> : <>
-
-                      <Button
-                        onClick={() => setReminder(item, true)}
-                        size={"xs"}
-                        bg='black'
-                        colorScheme='blackAlpha'
-                        fontWeight={"bold"}
-                        mt="10px"
-                        mb="15px"
-                      >
-                        ajouter un rappel
-                      </Button>
-                    </>
+                    <Button
+                      onClick={() =>
+                        {
+                          setReminder(
+                            item,
+                            !storage.reminders[item.time.getTime()]
+                          )
+                        }
+                        
+                      }
+                      size={"xs"}
+                      bg={
+                        storage.reminders[item.time.getTime()]
+                          ? "red"
+                          : "black"
+                      }
+                      colorScheme={
+                        storage.reminders[item.time.getTime()]
+                          ? "red"
+                          : "black"
+                      }
+                      fontWeight={"bold"}
+                      _hover={{
+                        background: storage.reminders[item.time.getTime()]
+                          ? "red !important"
+                          : "black",
+                      }}
+                      rightIcon={
+                        storage.reminders[item.time.getTime()] ? (
+                          <MdAlarmOff />
+                        ) : (
+                          <MdAlarmOn />
+                        )
+                      }
+                    >
+                        rappel
+                    </Button>
                   )}
+
                 </Stat>
               </div>
             )
           )}
         </div>
       )}
-      {(loading && isConnected) && (
+      {loading && isConnected && (
         <VStack
           pos={"absolute"}
           top={"50%"}
