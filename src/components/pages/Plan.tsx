@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, lazy, Suspense } from "react";
 import { useParams } from "react-router-dom";
 import {
   Stat,
@@ -9,15 +9,7 @@ import {
   IconButton,
   Text,
   HStack,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
   VStack,
-  Divider,
   Spinner,
 } from "@chakra-ui/react";
 import {
@@ -25,13 +17,11 @@ import {
   ArrowForwardIcon,
   WarningTwoIcon,
 } from "@chakra-ui/icons";
-import { MdAlarmOn, MdAlarmOff } from "react-icons/md";
+import { MdNotifications, MdNotificationsOff } from "react-icons/md";
 import { Network } from "@capacitor/network";
-import { SingleDatepicker } from "chakra-dayzed-datepicker";
 import {
   CourseItem,
-  EditModalProps,
-  HiddenStatProps,
+  ItemButtonsProps,
   PageAnimationType,
   PlanProps,
   RESOURCE_ID_NONE,
@@ -42,91 +32,60 @@ import { CALENDAR_URL, PROJECT_ID, getCalendarData } from "../api";
 import { LocalNotifications } from "@capacitor/local-notifications";
 import "../styles/plan.scss";
 
-const EditModal = ({
-  open,
-  date,
-  resourceId,
-  storage,
-  setOpen,
-  setPath,
-  setStorage,
-}: EditModalProps) => {
-  const [newDate, setNewDate] = useState<Date>(date);
+const EditModal = lazy(() => import('./modals/EditModal'));
 
-  return (
-    <Modal isOpen={open} onClose={() => setOpen(false)}>
-      <ModalOverlay />
-      <ModalContent>
-        <ModalHeader>Paramètres</ModalHeader>
-        <ModalCloseButton />
-        <ModalBody pb="50px" pt="50px">
-          <VStack>
-            <SingleDatepicker
-              date={newDate}
-              onDateChange={(dateNext: Date) => {
-                setNewDate(dateNext);
-              }}
-            />
-            {newDate.getTime() != date.getTime() && (
-              <Button
-                bg="black"
-                colorScheme="blackAlpha"
-                w="100%"
-                onClick={() => {
-                  setOpen(false);
-                  setPath(
-                    `/planning/${resourceId}/${newDate.getTime()}`,
-                    PageAnimationType.SPEED
-                  );
-                }}
-              >
-                Valider
-              </Button>
-            )}
-            <Divider mt="10px" mb="10px" />
-            <Button
-              w="100%"
-              colorScheme="gray"
-              onClick={() => {
-                setOpen(false);
-                setStorage({ ...storage, resourceId: 0 });
-                setPath("/", PageAnimationType.REVERSE);
-              }}
-            >
-              Changer de classe
-            </Button>
-          </VStack>
-        </ModalBody>
-
-        <ModalFooter>
-          <Button
-            bg="black"
-            colorScheme="blackAlpha"
-            onClick={() => setOpen(false)}
-          >
-            Fermer
-          </Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
-  );
-};
-
-const HiddenStat = ({ children }: HiddenStatProps) => {
+const ItemButtons = ({ item, storage, setReminder }: ItemButtonsProps) => {
   const [show, setShow] = useState(false);
 
-  return <StatHelpText>
-    <Button
-      onClick={() => setShow(!show)}
-      size={"xs"}
-      fontWeight={"bold"}
+  return <>
+    <HStack>
+      <Button
+        onClick={() => setShow(!show)}
+        size={"xs"}
+        fontWeight={"bold"}
 
-    >
-      {show ? "masquer" : "voir plus"}
-    </Button>
-    <br />
+      >
+        {show ? "masquer" : "voir plus"}
+      </Button>
+      {storage.notification &&
+        <IconButton
+          onClick={() => {
+            setReminder(
+              item,
+              !storage.reminders[item.time.getTime()]
+            )
+          }
+
+          }
+          size={"xs"}
+          bg={
+            storage.reminders[item.time.getTime()]
+              ? "red"
+              : "black"
+          }
+          colorScheme={
+            storage.reminders[item.time.getTime()]
+              ? "red"
+              : "black"
+          }
+          fontWeight={"bold"}
+          _hover={{
+            background: storage.reminders[item.time.getTime()]
+              ? "red !important"
+              : "black",
+          }}
+          aria-label=""
+          icon={
+            storage.reminders[item.time.getTime()] ? (
+              <MdNotificationsOff />
+            ) : (
+              <MdNotifications />
+            )
+          }
+        />}
+    </HStack>
     {show
-      ? children.split("<line>").map((text, index) => {
+      ? item.description.split("<line>").map((text, index) => {
         return (
           <Text key={index}>
             {text}
@@ -135,10 +94,8 @@ const HiddenStat = ({ children }: HiddenStatProps) => {
         );
       })
       : null}
-  </StatHelpText>
+  </>
 }
-
-const IdDate = (date: Date): number => parseInt(`${date.getMonth() + 1}${date.getDate() + 1}${date.getHours()}${date.getMinutes()}${date.getSeconds()}`)
 
 export default ({ storage, setPath, setStorage }: PlanProps) => {
   const { id, date } = useParams();
@@ -187,6 +144,13 @@ export default ({ storage, setPath, setStorage }: PlanProps) => {
           return;
         }
         setItems(calendar);
+
+
+        calendar.map(item => {
+          if (IsTodayDate(item.time)) {
+            onChangeReminder(item, true);
+          }
+        })
       })
       .catch(() => {
         setLoading(false);
@@ -207,39 +171,8 @@ export default ({ storage, setPath, setStorage }: PlanProps) => {
     };
   }, []);
 
-  const createNotification = useCallback((item: CourseItem) => {
-    if(item.time.getTime() < new Date().getTime())
-    {
-      return;
-    }
 
-    LocalNotifications.schedule({
-      notifications: [
-        {
-          title: item.summary,
-          body: item.location,
-          largeBody: item.description,
-          id: IdDate(item.time),
-          schedule: {
-            at: item.time,
-            allowWhileIdle: true,
-          },
-        },
-      ],
-    })
-  }, []);
-
-  const removeNotification = useCallback((item: CourseItem) => {
-    LocalNotifications.cancel({
-      notifications: [
-        {
-          id: IdDate(item.time),
-        },
-      ],
-    })
-  }, []);
-
-  const onOperationDate = useCallback(
+  const onChangeDate = useCallback(
     (opt: number) => {
       if (pageDate == null) return;
 
@@ -252,7 +185,7 @@ export default ({ storage, setPath, setStorage }: PlanProps) => {
     [pageId, pageDate, setPath]
   );
 
-  const setReminder = useCallback(
+  const onChangeReminder = useCallback(
     (item: CourseItem, set: boolean) => {
       let newReminders = storage.reminders;
       newReminders[item.time.getTime()] = set;
@@ -278,7 +211,7 @@ export default ({ storage, setPath, setStorage }: PlanProps) => {
             bg="transparent"
             color={"white"}
             _hover={{ background: "transparent" }}
-            onClick={() => onOperationDate(-1)}
+            onClick={() => onChangeDate(-1)}
           />
           <Text
             color={"white"}
@@ -295,7 +228,7 @@ export default ({ storage, setPath, setStorage }: PlanProps) => {
             bg="transparent"
             color={"white"}
             _hover={{ background: "transparent" }}
-            onClick={() => onOperationDate(1)}
+            onClick={() => onChangeDate(1)}
           />
         </HStack>
       </div>
@@ -324,51 +257,8 @@ export default ({ storage, setPath, setStorage }: PlanProps) => {
                   <StatLabel>{item.location}</StatLabel>
                   <StatNumber>{item.summary}</StatNumber>
                   <StatHelpText mb='20px'>{item.time_info}</StatHelpText>
-
-                  {item.description.length > 0 && (
-                    <HiddenStat>{item.description}</HiddenStat>
-                  )}
-                  {(storage.notification && index == 0) && (
-                    <Button
-                      onClick={() =>
-                        {
-                          setReminder(
-                            item,
-                            !storage.reminders[item.time.getTime()]
-                          )
-                        }
-                        
-                      }
-                      size={"xs"}
-                      bg={
-                        storage.reminders[item.time.getTime()]
-                          ? "red"
-                          : "black"
-                      }
-                      colorScheme={
-                        storage.reminders[item.time.getTime()]
-                          ? "red"
-                          : "black"
-                      }
-                      fontWeight={"bold"}
-                      _hover={{
-                        background: storage.reminders[item.time.getTime()]
-                          ? "red !important"
-                          : "black",
-                      }}
-                      rightIcon={
-                        storage.reminders[item.time.getTime()] ? (
-                          <MdAlarmOff />
-                        ) : (
-                          <MdAlarmOn />
-                        )
-                      }
-                    >
-                        rappel
-                    </Button>
-                  )}
-
                 </Stat>
+                <ItemButtons item={item} storage={storage} setReminder={onChangeReminder} />
               </div>
             )
           )}
@@ -385,15 +275,17 @@ export default ({ storage, setPath, setStorage }: PlanProps) => {
           <p>Chargement...</p>
         </VStack>
       )}
-      <EditModal
-        open={modalOpen}
-        storage={storage}
-        resourceId={pageId ?? RESOURCE_ID_NONE}
-        date={pageDate ?? new Date()}
-        setOpen={setOpenModal}
-        setPath={setPath}
-        setStorage={setStorage}
-      />
+      <Suspense>
+        <EditModal
+          open={modalOpen}
+          storage={storage}
+          resourceId={pageId ?? RESOURCE_ID_NONE}
+          date={pageDate ?? new Date()}
+          setOpen={setOpenModal}
+          setPath={setPath}
+          setStorage={setStorage}
+        />
+      </Suspense>
     </div>
   );
 };

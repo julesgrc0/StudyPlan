@@ -37,8 +37,10 @@ export const DEFAULT_STORAGE: StorageData = {
     resourceId: RESOURCE_ID_NONE
 }
 
-export type HiddenStatProps = {
-    children: string;
+export type ItemButtonsProps = {
+    item: CourseItem;
+    storage: StorageData;
+    setReminder: (item: CourseItem, set: boolean) => void;
 }
 
 export type EditModalProps = {
